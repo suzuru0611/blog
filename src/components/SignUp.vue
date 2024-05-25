@@ -38,6 +38,9 @@
 <script setup>
 import { ref } from "vue";
 import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
+import { useRouter } from 'vue-router';
+const router = useRouter();
+
 const email = ref('');
 const password = ref('');
 const errMsg = ref('');
@@ -51,6 +54,9 @@ const signUp = () => {
             // Signed up 
             const user = userCredential.user;
             // 註冊成功 跳轉至其他頁面
+            setTimeout(() => {
+                router.push('/SignIn');
+            }, 400);
         })
         .catch((error) => {
             // 錯誤訊息
