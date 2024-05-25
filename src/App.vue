@@ -1,11 +1,25 @@
-<template>
-  <div id="app">
-    <div>dad</div>
-  <SignUp/>
+<script setup>
+import HelloWorld from './components/HelloWorld.vue'
+import SignUp from "./components/SignUp.vue";
+</script>
 
-  </div>
+<template>
+  <SignUp />
 </template>
 
-<script>
-import SignUp from './views/SignUp.vue';
-</script>
+<style scoped>
+.logo {
+  height: 6em;
+  padding: 1.5em;
+  will-change: filter;
+  transition: filter 300ms;
+}
+
+.logo:hover {
+  filter: drop-shadow(0 0 2em #646cffaa);
+}
+
+.logo.vue:hover {
+  filter: drop-shadow(0 0 2em #42b883aa);
+}
+</style>
