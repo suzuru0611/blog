@@ -2,7 +2,7 @@
 import { ref, onMounted } from "vue";
 import { getAuth, onAuthStateChanged, signOut } from 'firebase/auth';
 import router from "./router/rourter";
-
+import TodoList from "./components/TodoList.vue";
 const auth = getAuth();
 
 const goToSignUP = () => {  // 跳至註冊頁
@@ -25,7 +25,7 @@ const handleSignOut = () => {
 };
 
 onMounted(() => {
-  onAuthStateChanged(auth, user => {  // 使用方法需上方引入
+  onAuthStateChanged(auth, user => {
     user ? (isLoggedIn.value = true) : (isLoggedIn.value = false);
   });
 });
@@ -33,6 +33,7 @@ onMounted(() => {
 </script>
 
 <template>
+  <TodoList />
   <button type="button" @click="goToSignIn" v-if="!isLoggedIn">登入</button>
   <button type="button" @click="handleSignOut" v-if="isLoggedIn">登出</button>
   <button type="button" @click="goToSignUP">註冊</button>
