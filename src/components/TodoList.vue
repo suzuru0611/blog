@@ -117,7 +117,14 @@ onUnmounted(() => { //組件被銷毀時
 });
 
 //修改資料
-
+const update=async todoItem=>{
+    try{
+        await updateDoc(doc(db,'todoList',todoItem.id),{
+            text:todoItem.text,
+            status:todoItem.
+        })
+    }
+}
 
 console.log(todoList);
 </script>
