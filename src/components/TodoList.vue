@@ -69,12 +69,32 @@
 
 <script setup>
 import { onMounted, onUnmounted, ref } from 'vue';
-import { collection, addDoc,onSnapshot, query, orderBy, snapshotEqual, doc } from 'firebase/firestore';
+import { collection, addDoc,onSnapshot, query, orderBy, snapshotEqual, doc,updateDoc } from 'firebase/firestore';
 import { db } from "../services/firebase";
 const todo = ref("");
 const todoList=ref([]);
 let unsubscribe;
 
+//創建資料
+const create = async () => {
+    if (!todo.value) {
+        return
+    }
+    try {
+        const docRef = await addDoc(collection(db, 'todoList'), {
+            text: todo.value,
+            date: new Date().getTime(),
+            status: false
+        })
+        console.log('Document written with ID', docRef.id);
+    } catch (error) {
+        console.log('Error adding document', error);
+    } finally {
+        todo.value = '';
+    }
+}
+
+// 資料讀取
 onMounted(async () => { //組件掛載完成時
 
     const lastestQuery = query(collection(db, 'todoList'),orderBy('date', 'desc')); //時間從大到小
@@ -96,23 +116,7 @@ onUnmounted(() => { //組件被銷毀時
   }
 });
 
-const create = async () => {
-    if (!todo.value) {
-        return
-    }
-    try {
-        const docRef = await addDoc(collection(db, 'todoList'), {
-            text: todo.value,
-            date: new Date().getTime(),
-            status: false
-        })
-        console.log('Document written with ID', docRef.id);
-    } catch (error) {
-        console.log('Error adding document', error);
-    } finally {
-        todo.value = '';
-    }
-}
+//修改資料
 
 
 console.log(todoList);
