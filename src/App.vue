@@ -3,6 +3,8 @@ import { ref, onMounted } from "vue";
 import { getAuth, onAuthStateChanged, signOut } from 'firebase/auth';
 import router from "./router/rourter";
 import TodoList from "./components/TodoList.vue";
+import UploadToFirebase from "./components/UploadToFirebase.vue";
+
 const auth = getAuth();
 
 const goToSignUP = () => {  // 跳至註冊頁
@@ -33,13 +35,14 @@ onMounted(() => {
 </script>
 
 <template>
-  <TodoList />
-  <button type="button" @click="goToSignIn" v-if="!isLoggedIn">登入</button>
+  <UploadToFirebase />
+  <!-- <TodoList /> -->
+  <!-- <button type="button" @click="goToSignIn" v-if="!isLoggedIn">登入</button>
   <button type="button" @click="handleSignOut" v-if="isLoggedIn">登出</button>
   <button type="button" @click="goToSignUP">註冊</button>
   <div>
     <RouterView />
-  </div>
+  </div> -->
 </template>
 
 <style scoped></style>
