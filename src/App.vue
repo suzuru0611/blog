@@ -4,6 +4,7 @@ import { getAuth, onAuthStateChanged, signOut } from 'firebase/auth';
 import router from "./router/rourter";
 import TodoList from "./components/TodoList.vue";
 import UploadToFirebase from "./components/UploadToFirebase.vue";
+import ChatRoom from "./components/ChatRoom.vue";
 
 const auth = getAuth();
 
@@ -35,7 +36,8 @@ onMounted(() => {
 </script>
 
 <template>
-  <UploadToFirebase />
+  <ChatRoom />
+  <!-- <UploadToFirebase /> -->
   <!-- <TodoList /> -->
   <!-- <button type="button" @click="goToSignIn" v-if="!isLoggedIn">登入</button>
   <button type="button" @click="handleSignOut" v-if="isLoggedIn">登出</button>
