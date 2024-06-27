@@ -36,7 +36,6 @@ import { nextTick, ref, onMounted } from "vue";
 import { storage } from "../services/firebase";
 import {
     ref as storageRef,
-    uploadBytes,
     uploadBytesResumable,
     getDownloadURL,
     listAll,
