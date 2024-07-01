@@ -1,5 +1,5 @@
 <template>
-    <div class="flex w-[90vw] flex-col mx-auto">
+    <div class="flex w-full flex-col mt-4 mx-auto">
         <div class="mb-4 flex items-center bg-violet-100 p-4">
             <input class="flex-1 mr-5" type="text" v-model.trim="todo" @keyup.enter="create" />
             <button class="border  mr-2 border-violet-400" type="button" @click="create">新增</button>
