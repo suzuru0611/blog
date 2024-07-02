@@ -1,39 +1,38 @@
 <template>
     <div class="relative">
         <div class="w-full h-screen flex items-center justify-center bg-hero-pattern bg-center bg-cover">
+            <Loading :isLoading="loading" />
             <div class="w-full h-screen absolute bg-gray-900 opacity-30 z-0">
             </div>
             <div class="flex w-[90%] h-[90%] rounded-xl overflow-hidden z-30 ">
                 <div class="w-[50%] bg-gray-100 hidden p-5  md:block">
                     <div class="flex gap-3">
                         <div :class="[
-                            'border-2 border-blue-500 text-lg font-bold px-3 py-1 rounded-xl transition duration-300',
-                            status === 0 ? 'bg-blue-500 text-white' : 'text-blue-500 hover:bg-blue-400 hover:text-white'
-                        ]" @click="status = 0">
+                'border-2 border-blue-500 text-lg font-bold px-3 py-1 rounded-xl transition duration-300',
+                status === 0 ? 'bg-blue-500 text-white' : 'text-blue-500 hover:bg-blue-400 hover:text-white'
+            ]" @click="status = 0">
                             我的日記
                         </div>
                         <div :class="[
-                            'border-2 border-blue-500 text-lg font-bold px-3 py-1 rounded-xl transition duration-300',
-                            status === 1 ? 'bg-blue-500 text-white' : 'text-blue-500 hover:bg-blue-400 hover:text-white'
-                        ]" @click="status = 1">待辦事項</div>
+                'border-2 border-blue-500 text-lg font-bold px-3 py-1 rounded-xl transition duration-300',
+                status === 1 ? 'bg-blue-500 text-white' : 'text-blue-500 hover:bg-blue-400 hover:text-white'
+            ]" @click="status = 1">待辦事項</div>
                     </div>
 
                     <div>
-                        <DaysSelect @openPopup="openPopup" @selectDay="selectDay" />
-
+                        <DaysSelect @loaded="onContentLoaded" @openPopup="openPopup" @selectDay="selectDay" />
                     </div>
                 </div>
                 <div class="w-full  flex flex-col items-center  bg-white p-5 md:w-[50%]">
-                    <NoteContent :selectDayItem="selectDayItem" />
+                    <NoteContent @loaded="onContentLoaded" :selectDayItem="selectDayItem" />
                 </div>
             </div>
 
         </div>
-        <!-- 背景灰色透明 -->
+        <!-- 待辦事項 -->
         <div v-if="status === 1" class="fixed top-0 left-0 w-full h-full flex items-center justify-center z-50">
             <TodoList v-if="status === 1" @openPopup="openPopup" class="z-30" />
             <div class="absolute w-full h-full bg-gray-900 opacity-50" @click="closePopup"></div>
-
         </div>
         <div v-if="popupVisible" class="fixed top-0 left-0 w-full h-full flex items-center justify-center z-50">
             <!-- 背景灰色透明 -->
@@ -72,15 +71,21 @@ import {
     deleteObject
 } from "firebase/storage";
 import { collection, getDocs, deleteDoc, doc } from "firebase/firestore";
-
-
 import NoteContent from "@/components/NoteContent.vue";
 import DaysSelect from "@/components/DaysSelect.vue";
 import TodoList from "@/components/TodoList.vue";
+import Loading from '@/components/Loading.vue';
+
 let currentItemToDelete = null;
 const selectDayItem = ref(null)
 const popupVisible = ref(false);
 const status = ref(0)
+const loading = ref(false)
+const contentLoaded = ref({
+    noteContent: false,
+    todoList: false
+});
+
 
 const selectDay = (item) => {
     selectDayItem.value = item
@@ -121,8 +126,13 @@ const removeImg = async (currentItemToDelete) => {
     }
 };
 
-
-
+const onContentLoaded = (component) => {
+    contentLoaded.value[component] = true;
+    if (contentLoaded.value.noteContent && contentLoaded.value.todoList) {
+        loading.value = false;
+        console.log('eee');
+    }
+}
 
 </script>
 

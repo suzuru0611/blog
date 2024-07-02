@@ -1,5 +1,20 @@
 <template>
     <div class="h-full w-full">
+        <div class="flex justify-between">
+            <div class="flex items-center gap-2">
+                {{ formatDate(timestamp, "YYYY-MM-DD") }}
+                <svg fill="gray" width="16px" height="16px" viewBox="0 0 122.88 122.88" xml:space="preserve">
+                    <g>
+                        <path fill-rule="evenodd" clip-rule="evenodd"
+                            d="M61.44,0c33.93,0,61.44,27.51,61.44,61.44c0,33.93-27.51,61.44-61.44,61.44C27.51,122.88,0,95.37,0,61.44 C0,27.51,27.51,0,61.44,0L61.44,0z M52.92,30.52h7.51c1.37,0,2.5,1.13,2.5,2.5v28.94h26.41c1.38,0,2.5,1.13,2.5,2.5v7.51 c0,1.38-1.13,2.5-2.5,2.5H50.41V33.02C50.41,31.64,51.54,30.52,52.92,30.52L52.92,30.52z M61.44,13.95 c26.23,0,47.49,21.26,47.49,47.49c0,26.23-21.26,47.49-47.49,47.49c-26.23,0-47.49-21.26-47.49-47.49 C13.95,35.22,35.21,13.95,61.44,13.95L61.44,13.95z" />
+                    </g>
+                </svg>
+            </div>
+            <span>
+                {{ formatDate(timestamp, 'MM-DD') }}
+            </span>
+
+        </div>
         <div
             class="h-[30%] w-full border-2 border-dashed mt-5 border-violet-400 flex justify-center overflow-hidden items-center relative md:min-h-[300px] xl:h-[50%]">
             <div type="button"
@@ -46,18 +61,20 @@
 </template>
 
 <script setup>
-import { ref, onMounted, defineProps, watch } from 'vue';
+import { ref, onMounted, defineProps, watch, defineEmits } from 'vue';
 import { storage, db } from "@/services/firebase"; // 引入Firebase配置
 import { ref as storageRef, uploadBytesResumable, getDownloadURL, deleteObject } from "firebase/storage";
 import { collection, addDoc, getDocs, updateDoc, doc } from "firebase/firestore"; // 引入Firestore函數
 import { v4 as uuidv4 } from 'uuid'; // 引入UUID
+import { formatDate } from "@/utils/utils.js";
 
 const selectedFile = ref(null);
 const uploadProgress = ref(null);
 const textData = ref(''); // 存儲文字描述
 const defaultImage = '/src/img/sample.jpeg'; // 預設圖片路徑
 const previewImage = ref(defaultImage); // 圖片預覽地址，預設為預設圖片
-
+const emit = defineEmits(['loaded']);
+const timestamp = ref('')
 const fileInput = ref(null);
 const props = defineProps({
     selectDayItem: {
@@ -126,7 +143,6 @@ const upload = async () => {
 
     // 清理狀態
     uploadProgress.value = null;
-    textData.value = '';
     fileInput.value.value = '';
     selectedFile.value = null;
     previewImage.value = defaultImage;
@@ -135,14 +151,17 @@ const upload = async () => {
 watch(() => props.selectDayItem, (newVal) => {
     if (newVal && newVal.url) {
         previewImage.value = newVal.url; // 如果有 URL，則設置預覽圖像為該 URL
-        textData.value = newVal.text || ''; // 如果 newVal.text 是空的，也將 textData 設置為空字符串
+        textData.value = newVal.text || '';
+        timestamp.value = newVal.timestamp// 如果 newVal.text 是空的，也將 textData 設置為空字符串
     } else {
         previewImage.value = defaultImage; // 如果沒有 URL，則設置預覽圖像為預設圖像
-        textData.value = ''; // 如果 newVal 是空的，也將 textData 設置為空字符串
+        textData.value = '';
+        timestamp.value = new Date()// 如果 newVal 是空的，也將 textData 設置為空字符串
     }
 }, { immediate: true });
 
 onMounted(() => {
+    emit('loaded', 'noteContent')
     // 在組件加載時執行的初始化操作
 });
 </script>
