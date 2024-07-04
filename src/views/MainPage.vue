@@ -4,7 +4,7 @@
             <Loading :isLoading="loading" />
             <div class="w-full h-screen absolute bg-gray-900 opacity-30 z-0">
             </div>
-            <div class="flex w-[90%] h-[90%] rounded-xl overflow-hidden z-30 ">
+            <div class="flex w-[90%] h-[90%] rounded-xl overflow-hidden z-30 xl:w-[60%] xl:h-[80%]">
                 <div class="w-[50%] bg-gray-100 hidden p-5  md:block">
                     <div class="flex gap-3">
                         <div :class="[
@@ -20,18 +20,19 @@
                     </div>
 
                     <div>
-                        <DaysSelect @loaded="onContentLoaded" @openPopup="openPopup" @selectDay="selectDay" />
+                        <DaysSelect @loaded="onContentLoaded" @openPopup="openPopup" @selectDay="selectDay"
+                            :userId="userId" />
                     </div>
                 </div>
                 <div class="w-full  flex flex-col items-center  bg-white p-5 md:w-[50%]">
-                    <NoteContent @loaded="onContentLoaded" :selectDayItem="selectDayItem" />
+                    <NoteContent @loaded="onContentLoaded" :selectDayItem="selectDayItem" :userId="userId" />
                 </div>
             </div>
 
         </div>
         <!-- 待辦事項 -->
         <div v-if="status === 1" class="fixed top-0 left-0 w-full h-full flex items-center justify-center z-50">
-            <TodoList v-if="status === 1" @openPopup="openPopup" class="z-30" />
+            <TodoList v-if="status === 1" :userId="userId" @openPopup="openPopup" class="z-30" />
             <div class="absolute w-full h-full bg-gray-900 opacity-50" @click="closePopup"></div>
         </div>
         <div v-if="popupVisible" class="fixed top-0 left-0 w-full h-full flex items-center justify-center z-50">
@@ -63,7 +64,7 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, defineProps, onMounted } from "vue";
 import { storage, db } from "@/services/firebase";
 
 import {
@@ -85,6 +86,15 @@ const contentLoaded = ref({
     noteContent: false,
     todoList: false
 });
+
+const props = defineProps({
+    userId: {
+        type: String,
+        required: true
+    }
+})
+
+
 
 
 const selectDay = (item) => {
@@ -113,11 +123,11 @@ const confirmRemove = () => {
 
 const removeImg = async (currentItemToDelete) => {
     try {
-        const docRef = collection(db, "images");
+        const docRef = collection(db, "users", props.userId, "userfile");
         const docSnapshot = await getDocs(docRef);
         docSnapshot.forEach(async (document) => {
             if (document.data().fullPath === currentItemToDelete) {
-                await deleteDoc(doc(db, "images", document.id));
+                await deleteDoc(doc(db, "users", props.userId, "userfile", document.id));
             }
         });
         await deleteObject(storageRef(storage, currentItemToDelete));
@@ -130,7 +140,6 @@ const onContentLoaded = (component) => {
     contentLoaded.value[component] = true;
     if (contentLoaded.value.noteContent && contentLoaded.value.todoList) {
         loading.value = false;
-        console.log('eee');
     }
 }
 

@@ -35,9 +35,9 @@
 import { ref } from "vue";
 import SignUp from "@/components/SignUp.vue";
 import SignIn from "@/components/SignIn.vue";
-
 const status = ref(0)
-console.log(status);
+
+
 </script>
 
 <style scoped></style>

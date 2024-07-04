@@ -52,28 +52,23 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, defineEmits } from "vue";
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 const email = ref('');
 const password = ref('');
 const errMsg = ref('');
+const emit = defineEmits(['loaded']);
 
 const auth = getAuth();
 const signIn = () => {
     signInWithEmailAndPassword(auth, email.value, password.value)
         .then((userCredential) => {
-            // Signed in 
             const user = userCredential.user;
-            console.log('userCredential', userCredential);
 
-            // 登入成功 跳轉至其他頁面
         })
         .catch((error) => {
-            // 錯誤訊息
             console.log('Firebase Auth Error:', error.code);
-
             if (error.code === 'auth/invalid-email') {
-
                 errMsg.value = 'Email錯誤';
             } else if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
                 errMsg.value = '尋找不到用戶';
@@ -81,8 +76,8 @@ const signIn = () => {
                 errMsg.value = '登入失敗，請稍後再試';
             }
         });
+};
 
-}
 </script>
 
 <style scoped></style>

@@ -12,7 +12,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, defineEmits } from 'vue';
+import { ref, onMounted, onUnmounted, defineEmits, defineProps } from 'vue';
 import { db } from "@/services/firebase";
 import { collection, onSnapshot } from "firebase/firestore";
 import { formatDate } from "@/utils/utils.js";
@@ -21,11 +21,15 @@ const emit = defineEmits(['selectDay', 'openPopup', 'loaded']);
 const loading = ref(false);
 const imagesWithText = ref([]);
 const selectedItem = ref(null);
-
+const props = defineProps({
+    userId: {
+        type: String,
+        required: true,
+    }
+});
 const getImgListAll = () => {
-
     // 監聽資料庫變化
-    const unsubscribe = onSnapshot(collection(db, "images"), (querySnapshot) => {
+    const unsubscribe = onSnapshot(collection(db, "users", props.userId, "userfile"), (querySnapshot) => {
         const tempArray = [];
         querySnapshot.forEach((doc) => {
             // 將文檔 ID 加入到資料中
@@ -40,7 +44,7 @@ const getImgListAll = () => {
         loading.value = false;
     });
 
-    emit('loaded', 'todoList')
+    emit('loaded', 'todoList');
     // 返回取消訂閱函數，以便在組件卸載時調用
     return unsubscribe;
 };

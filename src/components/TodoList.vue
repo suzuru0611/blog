@@ -53,14 +53,19 @@ const openUpdateId = ref();
 const openUpdateText = ref();
 const loading = ref(true);
 let unsubscribe;
-
+const props = defineProps({
+    userId: {
+        type: String,
+        required: true
+    }
+})
 //創建資料
 const create = async () => {
     if (!todo.value) {
         return
     }
     try {
-        const docRef = await addDoc(collection(db, 'todoList'), {
+        const docRef = await addDoc(collection(db, 'todoList', props.userId, 'list'), {
             text: todo.value,
             date: new Date().getTime(),
             status: false
@@ -76,7 +81,7 @@ const create = async () => {
 // 資料讀取
 onMounted(async () => { //組件掛載完成時
     loading.value = true;
-    const lastestQuery = query(collection(db, 'todoList'), orderBy('date', 'desc')); //時間從大到小
+    const lastestQuery = query(collection(db, 'todoList', props.userId, 'list'), orderBy('date', 'desc')); //時間從大到小
     unsubscribe = onSnapshot(lastestQuery, snapshot => { //監聽即時資料更新
         todoList.value = snapshot.docs.map(doc => {
             return {
@@ -122,7 +127,7 @@ const timestampToCustomFormat = timestamp => {
 const update = async todoItem => {
     console.log('update called', todoItem);
     try {
-        await updateDoc(doc(db, 'todoList', todoItem.id), {
+        await updateDoc(doc(db, 'todoList', props.userId, 'list', todoItem.id), {
             text: todoItem.text,
             status: todoItem.status
         });
@@ -136,7 +141,7 @@ const update = async todoItem => {
 //刪除資料
 const remove = async id => {
     try {
-        await deleteDoc(doc(db, 'todoList', id));
+        await deleteDoc(doc(db, 'todoList', props.userId, 'list', id));
     } catch (err) {
         console.log('error', err);
     }

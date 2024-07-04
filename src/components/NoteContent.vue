@@ -69,6 +69,8 @@ import { v4 as uuidv4 } from 'uuid'; // 引入UUID
 import { formatDate } from "@/utils/utils.js";
 
 const selectedFile = ref(null);
+const downloadURL = ref(null);
+
 const uploadProgress = ref(null);
 const textData = ref(''); // 存儲文字描述
 const defaultImage = '/src/img/sample.jpeg'; // 預設圖片路徑
@@ -79,8 +81,12 @@ const fileInput = ref(null);
 const props = defineProps({
     selectDayItem: {
         type: Object,
-        required: true,
+        required: false,
     },
+    userId: {
+        type: String,
+        required: true,
+    }
 });
 
 const triggerFileInput = () => {
@@ -89,21 +95,31 @@ const triggerFileInput = () => {
 
 const handleFileSelect = (event) => {
     selectedFile.value = event.target.files[0];
-    previewImage.value = URL.createObjectURL(selectedFile.value); // 設定預覽圖片地址
+    previewImage.value = URL.createObjectURL(selectedFile.value); // 设置预览图片地址
 };
 
+const defaulthandleFileSelect = async () => {
+    const url = defaultImage;
+    const response = await fetch(url);
+    const blob = await response.blob();
+    const mimeType = blob.type || 'image/jpeg'; // 获取 Blob 的 MIME 类型或使用默认类型
+    const file = new File([blob], 'defaultImage.jpeg', { type: mimeType });
+    selectedFile.value = file;
+    previewImage.value = URL.createObjectURL(file);
+};
 const upload = async () => {
     if (!selectedFile.value && !textData.value) {
         return;
     }
 
-    let downloadURLValue = null;
+    let downloadURLValue = downloadURL.value;
+    let storageName; // 在此定义 storageName
 
     if (selectedFile.value) {
-        // 處理檔案上傳邏輯
+        // 处理文件上传逻辑
         const fileExtension = selectedFile.value.name.split('.').pop();
         const fileName = `${uuidv4()}.${fileExtension}`;
-        const storageName = storageRef(storage, `images/${fileName}`);
+        storageName = storageRef(storage, `images/${props.userId}/${fileName}`);
         const uploadTask = uploadBytesResumable(storageName, selectedFile.value);
 
         await new Promise((resolve, reject) => {
@@ -125,23 +141,29 @@ const upload = async () => {
         });
     }
 
-    // 準備更新的資料對象
+    // 准备更新的数据对象
     let updatedData = {
         text: textData.value,
         url: downloadURLValue || (props.selectDayItem && props.selectDayItem.url),
     };
 
-    if (props.selectDayItem && props.selectDayItem.id) {
-        // 如果存在 props.selectDayItem.id，則更新現有文檔
-        const docRef = doc(db, "images", props.selectDayItem.id);
-        await updateDoc(docRef, updatedData);
-    } else {
-        // 如果不存在 props.selectDayItem.id，則創建新文檔
-        updatedData.timestamp = new Date().getTime(); // 設定時間戳為當前時間
-        await addDoc(collection(db, "images"), updatedData);
+    if (storageName) {
+        updatedData.fullPath = storageName.fullPath;
     }
 
-    // 清理狀態
+    if (props.selectDayItem && props.selectDayItem.id) {
+        // 更新现有文档
+        const docRef = doc(db, "users", props.userId, "userfile", props.selectDayItem.id);
+
+        await updateDoc(docRef, updatedData);
+    } else {
+        // 创建新文档
+        updatedData.url = downloadURLValue || props.selectDayItem.url; // 使用编辑项的 URL
+        updatedData.timestamp = new Date().getTime(); // 设置时间戳为当前时间
+        await addDoc(collection(db, "users", props.userId, "userfile"), updatedData);
+    }
+
+    // 清理状态
     uploadProgress.value = null;
     fileInput.value.value = '';
     selectedFile.value = null;
@@ -149,7 +171,7 @@ const upload = async () => {
 };
 
 watch(() => props.selectDayItem, (newVal) => {
-    if (newVal && newVal.url) {
+    if (newVal) {
         previewImage.value = newVal.url; // 如果有 URL，則設置預覽圖像為該 URL
         textData.value = newVal.text || '';
         timestamp.value = newVal.timestamp// 如果 newVal.text 是空的，也將 textData 設置為空字符串
@@ -162,6 +184,8 @@ watch(() => props.selectDayItem, (newVal) => {
 
 onMounted(() => {
     emit('loaded', 'noteContent')
+    defaulthandleFileSelect();
+
     // 在組件加載時執行的初始化操作
 });
 </script>
