@@ -1,5 +1,6 @@
 !<template>
-    <div class='flex flex-col min-h-screen relative' ref="messageCotent">
+    <div class='flex flex-col  p-6 relative bg-white' ref="messageCotent">
+        <!-- 輸入框 -->
         <div class="flex flex-wrap items-center p-2 sticky-top-0 bg-gray-200">
             <label for="fileInput">
                 <img src="/src/img/file.png" alt="file">
@@ -17,11 +18,11 @@
                 {{ uploadProgress }}%
             </div>
         </div>
-        <div v-if="isLoading" class="mt-6">loading...</div>
-        <div class="mt-6 mx-2" v-else>
+        <!-- 留言內容 -->
+        <div class="mt-6 mx-2 h-[500px] overflow-y-auto">
             <div class="flex mb-3 gap-2" v-for="(item, key) in chatroom" :key="key"
-                :class="{ 'flex-row-reverse': item.username === username }">
-                <div class="avatar mt-1" v-if="item.username !== username">
+                :class="{ 'flex-row-reverse': item.username === userId }">
+                <div class="avatar mt-1" v-if="item.username !== userId">
                     <span>{{ item.username.slice(0, 1) }}</span>
                 </div>
                 <div class="max-w-2/3">
@@ -32,8 +33,8 @@
                         </small>
                     </div>
                     <div class="p-2 mt-2 rounded-lg" :class="{
-                'bg-blue-500 text-white': item.username === username,
-                'bg-gray-100': item.username !== username
+                'bg-blue-500 text-white': item.username === userId,
+                'bg-gray-100': item.username !== userId
             }">
                         <p v-if="item.type === 'text'">{{ item.message }}</p>
                         <img v-else-if="item.type === 'image'" :src="item.message" alt="image" class="max-w-[150px]" />
@@ -61,7 +62,7 @@ import {
 } from 'firebase/firestore';
 import { onMounted, onUnmounted, ref, inject, nextTick } from 'vue';
 const props = defineProps({
-    username: String,
+    userId: String,
 });
 const isLoading = ref(true);
 const fileInput = ref(null);
@@ -75,9 +76,11 @@ const addMessage = async () => {
         return;
     }
     try {
+        console.log(message.value);
+        console.log(props.userId);
         const docRef = await addDoc(collection(db, 'messages'), {
             message: message.value,
-            username: props.username,
+            username: props.userId,
             time: Date.now(),
             type: 'text',
         });
@@ -120,7 +123,7 @@ const uploadImage = async (file) => {
             fileInput.value.value = '';
             await addDoc(collection(db, 'messages'), {
                 message: downloadURL,
-                username: props.username,
+                username: props.userId,
                 time: Date.now(),
                 type: 'image',
             });
@@ -130,7 +133,7 @@ const uploadImage = async (file) => {
 };
 
 onMounted(async () => {
-    const lastestQuery = query(collection(db, 'messages'), orderBy('time'));
+    const lastestQuery = query(collection(db, 'messages'), orderBy('time', 'desc'));
 
     unsubscribe = onSnapshot(
         lastestQuery,

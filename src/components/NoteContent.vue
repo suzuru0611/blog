@@ -18,7 +18,7 @@
         <div
             class="h-[30%] w-full border-2 border-dashed mt-5 border-violet-400 flex justify-center overflow-hidden items-center relative md:min-h-[300px] xl:h-[50%]">
             <div type="button"
-                class="border-t-2 border-l-2 z-30 border-dashed border-violet-400 rounded-tl-lg absolute right-0 bottom-0 bg-white p-3"
+                class="border-t-2 border-l-2 z-30  cursor-pointer  border-dashed border-violet-400 rounded-tl-lg absolute right-0 bottom-0 bg-white p-3"
                 @click="triggerFileInput">
                 <svg fill="#4662be" height="20" width="20" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 487 487">
                     <g>
@@ -36,7 +36,7 @@
                 <img v-else :src="defaultImage" alt="Default Image">
             </div>
         </div>
-        <div class="w-full h-[55%] xl:h-[40%]">
+        <div class="w-full h-[50%] xl:h-[40%]">
             <textarea type="text" v-model="textData" placeholder="今天的心情...."
                 class="block h-full w-full text-md focus:outline-none mt-3" />
         </div>
@@ -46,7 +46,7 @@
                 {{ uploadProgress }}%
             </div>
             <div type="button"
-                class="flex items-center justify-center rounded-xl gap-1 py-2 bg-blue-500 text-white w-[80px]"
+                class="flex items-center cursor-pointer  justify-center rounded-xl gap-1 py-2 bg-blue-500 text-white w-[80px]"
                 @click="upload">
                 儲存
                 <svg width="16px" height="16px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
