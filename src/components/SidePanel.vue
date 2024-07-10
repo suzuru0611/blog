@@ -9,13 +9,15 @@
             </div>
 
         </div>
-        <nav class="mt-2">
+        <nav class="mt-2 text-center">
             <a href="#" @click="sideStatus(0)"
-                class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-200">我的日記</a>
-            <a href="#" @click="sideStatus(1)" class=" block py-2.5 px-4 rounded transition duration-200
+                class="border-b-2 border-dotted block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-200">我的日記</a>
+            <a href="#" @click="sideStatus(1)" class="border-b-2 border-dotted block py-2.5 px-4 rounded transition duration-200
                 hover:bg-gray-200">待辦事項</a>
             <a href="#" @click="sideStatus(3)"
-                class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-200">聊天室</a>
+                class="border-b-2 border-dotted block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-200">聊天室</a>
+            <a href="#" @click="handleSignOut()"
+                class="border-b-2 border-dotted block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-200">登出</a>
         </nav>
     </aside>
 
@@ -23,6 +25,8 @@
 
 <script setup>
 import { ref, defineProps, defineEmits } from 'vue';
+import { getAuth, signOut } from 'firebase/auth';
+const auth = getAuth();
 
 const emit = defineEmits(['closeSidebar', 'sideStatus']);
 
@@ -42,6 +46,17 @@ const props = defineProps({
     }
 })
 
+
+//觸發登出
+const handleSignOut = () => {
+    signOut(auth)
+        .then(() => {
+            router.push('/login')
+        })
+        .catch(error => {
+            console.log('登出失敗', error);
+        });
+};
 </script>
 
 <style>

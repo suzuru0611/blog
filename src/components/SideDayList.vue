@@ -1,9 +1,8 @@
 <template>
-    <div class="flex flex-col justify-center my-4">
-        <div class="text-center border text-blue-500 p-5 cursor-pointer transition duration-300 hover:bg-white"
-            @click="newPage">
-            新增日記
-        </div>
+    <div class="fixed inset-0 bg-gray-600 bg-opacity-75 transition-opacity z-40" v-if="isSideDayListOpen"
+        @click="closeSidebar"></div>
+    <aside
+        :class="['transform z-50 top-0 left-0 w-[80%] sm:w-[400px] bg-white fixed h-full overflow-auto ease-in-out transition-all duration-300 ', isSideDayListOpen ? 'translate-x-0' : '-translate-x-full']">
         <div v-for="item in imagesWithText" :key="item.url"
             :class="['flex justify-between cursor-pointer  w-full box-border border relative px-3 py-4 mr-[1%] transition duration-300', selectedItem === item ? 'bg-white' : 'hover:bg-white']"
             @click="selectDay(item)">
@@ -12,29 +11,34 @@
                 <img src="/src/img/delete.svg" width="32" height="32" />
             </button>
         </div>
-    </div>
+    </aside>
+
 </template>
 
 <script setup>
 import { ref, onMounted, onUnmounted, defineEmits, defineProps } from 'vue';
 import { db } from "@/services/firebase";
 import { collection, onSnapshot } from "firebase/firestore";
-const emit = defineEmits(['selectDay', 'openPopup', 'loaded', 'newPage']);
-
-const loading = ref(false);
+const emit = defineEmits(['selectDay', 'openPopup', 'loaded', 'closeSidebar']);
 const imagesWithText = ref([]);
 const selectedItem = ref(null);
+
+
+const closeSidebar = () => {
+    emit('closeSidebar', false);
+};
+
 const props = defineProps({
-    userId: {
-        type: String,
+    isSideDayListOpen: {
+        Type: Boolean,
         required: true,
-    }
-});
+    },
+    userId: {
+        Type: String,
+        required: true,
+    },
 
-
-const newPage = () => {
-    emit('newPage')
-}
+})
 
 //列出所屬用戶資料
 const getImgListAll = () => {
@@ -50,10 +54,8 @@ const getImgListAll = () => {
         // 根據需要排序
         tempArray.sort((a, b) => b.timestamp - a.timestamp);
         imagesWithText.value = tempArray;
-        loading.value = false;
     });
 
-    emit('loaded', 'todoList');
     // 返回取消訂閱函數，以便在組件卸載時調用
     return unsubscribe;
 };
@@ -75,4 +77,9 @@ onMounted(() => {
         unsubscribe();
     });
 });
+
 </script>
+
+<style>
+/* Add your custom styles here */
+</style>

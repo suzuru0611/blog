@@ -1,5 +1,5 @@
 !<template>
-    <div class='flex flex-col  p-6 relative bg-white' ref="messageCotent">
+    <div class='flex flex-col w-[80%] p-6 relative bg-white sm:w-[40%]' ref="messageCotent">
         <!-- 輸入框 -->
         <div class="flex flex-wrap items-center p-2 sticky-top-0 bg-gray-200">
             <label for="fileInput">
@@ -7,8 +7,8 @@
             </label>
             <input type="file" ref="fileInput" id="fileInput" accept="image/*" @change="handleFileSelect"
                 class="hidden" />
-            <input type="text" class="border p-1 flex-1" v-model.trim="message" @keyup.enter="addMessage"
-                placeholder="輸入訊息" />
+            <input type="text" class="border p-1 flex-1 min-w-[75px] mx-1" v-model.trim="message"
+                @keyup.enter="addMessage" placeholder="輸入訊息" />
             <button class="border p-2 bg-green-400 text-white" type="button" @click="addMessage">
                 送出
             </button>
@@ -19,24 +19,25 @@
             </div>
         </div>
         <!-- 留言內容 -->
-        <div class="mt-6 mx-2 h-[500px] overflow-y-auto">
+        <div class="mt-6 mx-2 h-[300px] overflow-y-auto sm:h-[500px]">
             <div class="flex mb-3 gap-2" v-for="(item, key) in chatroom" :key="key"
                 :class="{ 'flex-row-reverse': item.username === userId }">
-                <div class="avatar mt-1" v-if="item.username !== userId">
+                <div class="bg-blue-500 rounded-2xl w-8 h-8 mt-1 flex justify-center items-center text-white"
+                    v-if="item.username !== userId">
                     <span>{{ item.username.slice(0, 1) }}</span>
                 </div>
-                <div class="max-w-2/3">
-                    <div class="text-right">
+                <div class="max-w-[66.6%]">
+                    <div :class="{ 'text-right': item.username === userId, 'text-left': item.username === userId }">
                         <small class="text-grat-500 ml-2">
-                            {{ new Date(item.time).toDateString() }}
+                            {{ formatDate(item.time, 'YYYY-MM-DD') }}
                             {{ new Date(item.time).toLocaleTimeString() }}
                         </small>
                     </div>
-                    <div class="p-2 mt-2 rounded-lg" :class="{
+                    <div class="p-2 mt-2 rounded-lg w-auto" :class="{
                 'bg-blue-500 text-white': item.username === userId,
                 'bg-gray-100': item.username !== userId
             }">
-                        <p v-if="item.type === 'text'">{{ item.message }}</p>
+                        <p class="break-all" v-if="item.type === 'text'">{{ item.message }}</p>
                         <img v-else-if="item.type === 'image'" :src="item.message" alt="image" class="max-w-[150px]" />
                     </div>
                 </div>
@@ -48,6 +49,7 @@
 <script setup>
 import { db } from '@/services/firebase.js';
 import { storage } from '@/services/firebase.js';
+import { formatDate } from "@/utils/utils.js";
 import {
     ref as storageRef,
     uploadBytesResumable,
@@ -64,6 +66,7 @@ import { onMounted, onUnmounted, ref, inject, nextTick } from 'vue';
 const props = defineProps({
     userId: String,
 });
+
 const isLoading = ref(true);
 const fileInput = ref(null);
 const message = ref('');
@@ -72,7 +75,7 @@ const uploadProgress = ref(null);
 let unsubscribe;
 
 const addMessage = async () => {
-    if (!message) {
+    if (!message.value.trim()) { // 確保至少一個字
         return;
     }
     try {

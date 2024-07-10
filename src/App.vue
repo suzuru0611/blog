@@ -1,10 +1,15 @@
 <template>
   <div>
     <Loading class="z-50" :isLoading="loading" />
-    <router-view v-if="isLoggedIn" :userId="userId" /> <!-- 根據 isLoggedIn 和 loading 的狀態顯示對應頁面 -->
-    <Login v-if="!isLoggedIn" />
-    <button @click="handleSignOut()" v-if="isLoggedIn">登出</button>
+    <Transition name="fade">
+      <router-view v-if="isLoggedIn" :userId="userId" />
+    </Transition>
+    <Transition name="fade">
+      <Login v-if="!isLoggedIn" />
+    </Transition>
+
   </div>
+
 </template>
 
 <script setup>
@@ -37,21 +42,24 @@ onMounted(() => {
   });
 });
 
-//觸發登出
-const handleSignOut = () => {
-  loading.value = true;
-  signOut(auth)
-    .then(() => {
-      isLoggedIn.value = false;
-      router.push('/login').then(() => {
-        loading.value = false;
-      });
-    })
-    .catch(error => {
-      console.log('登出失敗', error);
-      loading.value = false;
-    });
-};
+
 </script>
 
-<style scoped></style>
+<style scoped>
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+
+.fade-enter-to,
+.fade-leave-from {
+  opacity: 1;
+}
+
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+</style>

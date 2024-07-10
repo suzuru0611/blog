@@ -1,5 +1,5 @@
 <template>
-    <div class="flex w-[80%] h-auto p-5 flex-col mx-auto bg-white sm:w-[50%] ">
+    <div class="flex w-[80%] h-auto p-5 flex-col mx-auto bg-white sm:w-[40%] ">
         <Loading :isLoading="loading" />
         <div class="mb-4 flex items-center bg-violet-100 p-4">
             <input class="flex-1 mr-5 min-w-[160px]" type="text" v-model.trim="todo" @keyup.enter="create" />
