@@ -150,8 +150,6 @@ const props = defineProps({
 
 const newPage = () => {
     if (noteContentRef.value) {
-        console.log('有觸發到');
-
         noteContentRef.value.newPage()
     }
 }

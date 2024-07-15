@@ -92,7 +92,7 @@ import { getAuth } from 'firebase/auth';
 import { v4 as uuidv4 } from 'uuid'; // 引入UUID
 import { formatDate } from "@/utils/utils.js";
 import { usePopupStore } from '@/store/popup02';
-
+import defaultImage from '@/img/sample.jpeg';
 const auth = getAuth();
 const user = auth.currentUser;
 const popupStore = usePopupStore()
@@ -101,7 +101,6 @@ const downloadURL = ref(null);
 const titleData = ref(formatDate(new Date(), 'MM-DD'));
 const uploadProgress = ref(null);
 const textData = ref(''); // 儲存文字
-const defaultImage = '/src/img/sample.jpeg'; // 預設圖片路徑
 const previewImage = ref(defaultImage); // 圖片預覽地址，預設為預設圖片
 const emit = defineEmits(['loaded', 'resetContent']);
 const timestamp = ref('')
