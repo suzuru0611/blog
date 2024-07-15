@@ -84,7 +84,7 @@
             </div>
         </Transition>
 
-
+        <Popup />
         <!-- 日記刪除popup -->
         <Transition name="fade">
             <div v-if="popupVisible" class="fixed top-0 left-0 w-full h-full flex items-center justify-center z-50">
@@ -117,13 +117,7 @@
 
 <script setup>
 import { ref, defineProps, onMounted } from "vue";
-import { storage, db } from "@/services/firebase";
 
-import {
-    ref as storageRef,
-    deleteObject
-} from "firebase/storage";
-import { collection, getDocs, deleteDoc, doc } from "firebase/firestore";
 import NoteContent from "@/components/NoteContent.vue";
 import DaysSelect from "@/components/DaysSelect.vue";
 import TodoList from "@/components/TodoList.vue";
@@ -131,7 +125,7 @@ import Loading from '@/components/Loading.vue';
 import Chat from "@/components/ChatComponents/Chat.vue";
 import SidePanel from "@/components/SidePanel.vue";
 import SideDayList from "@/components/SideDayList.vue";
-
+import Popup from "@/components/Popup.vue";
 
 let currentItemToDelete = null;
 const isSidebarOpen = ref(false)
@@ -191,28 +185,8 @@ const closePopup = () => {
     status.value = 0
 };
 
-const confirmRemove = () => {
-    if (currentItemToDelete) {
-        removeImg(currentItemToDelete);
-        currentItemToDelete = null;
-        closePopup();
-    }
-};
 
-const removeImg = async (currentItemToDelete) => {
-    try {
-        const docRef = collection(db, "users", props.userId, "userfile");
-        const docSnapshot = await getDocs(docRef);
-        docSnapshot.forEach(async (document) => {
-            if (document.data().fullPath === currentItemToDelete) {
-                await deleteDoc(doc(db, "users", props.userId, "userfile", document.id));
-            }
-        });
-        await deleteObject(storageRef(storage, currentItemToDelete));
-    } catch (error) {
-        console.error('Error deleting image', error);
-    }
-};
+
 
 const onContentLoaded = (component) => {
     contentLoaded.value[component] = true;

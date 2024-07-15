@@ -16,7 +16,9 @@
                 hover:bg-gray-200">待辦事項</a>
             <a href="#" @click="sideStatus(3)"
                 class="border-b-2 border-dotted block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-200">聊天室</a>
-            <a href="#" @click="handleSignOut()"
+            <a href="#" @click="navigateToPostWall"
+                class="border-b-2 border-dotted block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-200">投稿聊天室</a>
+            <a href="#" @click="openPopup"
                 class="border-b-2 border-dotted block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-200">登出</a>
         </nav>
     </aside>
@@ -26,6 +28,10 @@
 <script setup>
 import { ref, defineProps, defineEmits } from 'vue';
 import { getAuth, signOut } from 'firebase/auth';
+import { usePopupStore } from '@/store/popup02';
+import router from "@/router/rourter";
+
+const popupStore = usePopupStore()
 const auth = getAuth();
 
 const emit = defineEmits(['closeSidebar', 'sideStatus']);
@@ -47,18 +53,24 @@ const props = defineProps({
 })
 
 
-//觸發登出
-const handleSignOut = () => {
-    signOut(auth)
-        .then(() => {
-            router.push('/login')
-        })
-        .catch(error => {
-            console.log('登出失敗', error);
-        });
+// 跳轉到PostWall
+const navigateToPostWall = () => {
+    router.push('/PostWall');
 };
+
+//觸發登出
+const openPopup = () => {
+    popupStore.showPopup('登出', `您確定要登出嗎？`, () => {
+        signOut(auth)
+            .then(() => {
+                router.push('/login')
+            })
+            .catch(error => {
+                console.log('登出失敗', error);
+            });
+    });
+};
+
 </script>
 
-<style>
-/* Add your custom styles here */
-</style>
+<style></style>

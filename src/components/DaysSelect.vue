@@ -8,7 +8,7 @@
             :class="['flex justify-between cursor-pointer  w-full box-border border relative px-3 py-4 mr-[1%] transition duration-300', selectedItem === item ? 'bg-white' : 'hover:bg-white']"
             @click="selectDay(item)">
             <p class="flex-1">{{ item.title }}</p>
-            <button type="button" class="cursor-pointer" @click.stop="openPopup(item.fullPath)">
+            <button type="button" class="cursor-pointer" @click.stop="openPopup(item)">
                 <img src="/src/img/delete.svg" width="32" height="32" />
             </button>
         </div>
@@ -18,12 +18,35 @@
 <script setup>
 import { ref, onMounted, onUnmounted, defineEmits, defineProps } from 'vue';
 import { db } from "@/services/firebase";
-import { collection, onSnapshot } from "firebase/firestore";
-const emit = defineEmits(['selectDay', 'openPopup', 'loaded', 'newPage']);
+import { collection, onSnapshot, getDocs, deleteDoc, doc } from "firebase/firestore";
+import { usePopupStore } from '@/store/popup02';
+import {
+    ref as storageRef,
+    deleteObject
+} from "firebase/storage";
+const popupStore = usePopupStore();
+const openPopup = (item) => {
+    popupStore.showPopup('刪除日記', `您確定要刪除嗎？`, async () => {
+        try {
+            const docRef = collection(db, "users", props.userId, "userfile");
+            const querySnapshot = await getDocs(docRef);
+            querySnapshot.forEach(async (document) => {
+                if (document.data().fullPath === item.fullPath) {
+                    await deleteDoc(doc(db, "users", props.userId, "userfile", document.id));
+                }
+            });
+            await deleteObject(storageRef(storage, item.fullPath));
+        } catch (error) {
+            console.error('Error deleting image', error);
+        }
+    });
+};
+
 
 const loading = ref(false);
 const imagesWithText = ref([]);
 const selectedItem = ref(null);
+const emit = defineEmits(['selectDay', 'openPopup', 'loaded', 'newPage']);
 const props = defineProps({
     userId: {
         type: String,
@@ -62,11 +85,6 @@ const getImgListAll = () => {
 const selectDay = (item) => {
     selectedItem.value = item;
     emit('selectDay', item);
-};
-
-//popup刪除傳遞fullpath
-const openPopup = (fullPath) => {
-    emit('openPopup', fullPath);
 };
 
 onMounted(() => {

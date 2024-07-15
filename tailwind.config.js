@@ -6,7 +6,7 @@ export default {
       backgroundImage: {
         "hero-pattern": "url('@/img/background.jpeg')",
         "login-pattern": "url('@/img/LoginCover01.jpeg')",
-        "note-pattern": "url('@/img/123.jpeg')",
+        "postwall-pattern": "url('@/img/postwall.jpeg')",
       },
     },
   },

@@ -45,7 +45,7 @@
                 <div class="flex gap-2">
                     <div v-if="props.selectDayItem" type="button"
                         class="flex items-center cursor-pointer justify-center rounded-xl gap-1 py-2 bg-[#6a5acd]  text-white w-auto p-3 text-md trasition duration-300 hover:bg-[#7a6fc2]"
-                        @click="upload">
+                        @click="openPopup">
                         分享日記
                         <svg width="16px" height="16px" viewBox="0 0 24 24" fill="none"
                             xmlns="http://www.w3.org/2000/svg">
@@ -88,14 +88,19 @@ import { ref, onMounted, defineProps, watch, defineEmits, defineExpose } from 'v
 import { storage, db } from "@/services/firebase"; // 引入Firebase配置
 import { ref as storageRef, uploadBytesResumable, getDownloadURL, deleteObject } from "firebase/storage";
 import { collection, addDoc, getDocs, updateDoc, doc } from "firebase/firestore"; // 引入Firestore函數
+import { getAuth } from 'firebase/auth';
 import { v4 as uuidv4 } from 'uuid'; // 引入UUID
 import { formatDate } from "@/utils/utils.js";
+import { usePopupStore } from '@/store/popup02';
 
+const auth = getAuth();
+const user = auth.currentUser;
+const popupStore = usePopupStore()
 const selectedFile = ref(null);
 const downloadURL = ref(null);
 const titleData = ref(formatDate(new Date(), 'MM-DD'));
 const uploadProgress = ref(null);
-const textData = ref(''); // 存儲文字描述
+const textData = ref(''); // 儲存文字
 const defaultImage = '/src/img/sample.jpeg'; // 預設圖片路徑
 const previewImage = ref(defaultImage); // 圖片預覽地址，預設為預設圖片
 const emit = defineEmits(['loaded', 'resetContent']);
@@ -112,6 +117,40 @@ const props = defineProps({
     }
 });
 
+const userId = user.uid;
+
+
+const openPopup = () => {
+    popupStore.showPopup('分享日記', `確定要分享到投稿日記牆嗎？`, () => {
+        let downloadURLValue = downloadURL.value;
+        let storageName;
+
+        if (selectedFile.value) {
+            // 處理文件上傳邏輯
+            const fileExtension = selectedFile.value.name.split('.').pop();
+            const fileName = `${uuidv4()}.${fileExtension}`;
+            storageName = storageRef(storage, `images / PostWall/${fileName}`);
+        }
+
+        // 更新的內容
+        let updatedData = {
+            title: titleData.value,
+            text: textData.value,
+            url: downloadURLValue || (props.selectDayItem && props.selectDayItem.url),
+        };
+
+        if (storageName) {
+            updatedData.fullPath = storageName.fullPath;
+        }
+
+        updatedData.title = titleData ? titleData.value : new Date().getTime(); // 抓預設獲選取的圖片
+        updatedData.url = downloadURLValue || props.selectDayItem.url; // 抓預設獲選取的圖片
+        updatedData.userId = userId; // 設置為當前時間
+        updatedData.timestamp = new Date().getTime(); // 設置為當前時間
+        addDoc(collection(db, "PostWall"), updatedData);
+
+    });
+};
 
 
 const triggerFileInput = () => {
@@ -120,24 +159,22 @@ const triggerFileInput = () => {
 
 const handleFileSelect = (event) => {
     selectedFile.value = event.target.files[0];
-    previewImage.value = URL.createObjectURL(selectedFile.value); // 设置预览图片地址
+    previewImage.value = URL.createObjectURL(selectedFile.value); // 預覽圖片網址
 };
 
 const defaulthandleFileSelect = async () => {
     const url = defaultImage;
     const response = await fetch(url);
     const blob = await response.blob();
-    const mimeType = blob.type || 'image/jpeg'; // 获取 Blob 的 MIME 类型或使用默认类型
+    const mimeType = blob.type || 'image/jpeg'; // Blob类型或使用默認類型
     const file = new File([blob], 'defaultImage.jpeg', { type: mimeType });
     selectedFile.value = file;
     previewImage.value = URL.createObjectURL(file);
 };
 
 const newPage = () => {
-    console.log('eeeeeeeee33333');
     titleData.value = formatDate(new Date(), "YYYY-MM-DD");
     emit('resetContent', null)
-    console.log(props.selectDayItem);
 }
 
 defineExpose({
@@ -146,10 +183,10 @@ defineExpose({
 
 const upload = async (shouldClearState = true) => {
     let downloadURLValue = downloadURL.value;
-    let storageName; // 在此定义 storageName
-
+    let storageName;
+    console.log(userId);
     if (selectedFile.value) {
-        // 处理文件上传逻辑
+        // 處理文件上傳邏輯
         const fileExtension = selectedFile.value.name.split('.').pop();
         const fileName = `${uuidv4()}.${fileExtension}`;
         storageName = storageRef(storage, `images/${props.userId}/${fileName}`);
@@ -174,7 +211,7 @@ const upload = async (shouldClearState = true) => {
         });
     }
 
-    // 准备更新的数据对象
+    // 更新的內容
     let updatedData = {
         title: titleData.value,
         text: textData.value,
@@ -186,11 +223,11 @@ const upload = async (shouldClearState = true) => {
     }
 
     if (props.selectDayItem && props.selectDayItem.id) {
-        // 更新现有文档
+        // 更新已有檔案
         const docRef = doc(db, "users", props.userId, "userfile", props.selectDayItem.id);
         await updateDoc(docRef, updatedData);
     } else {
-        // 创建新文档
+        // 創建新檔案
         updatedData.title = titleData ? titleData.value : new Date().getTime(); // 抓預設獲選取的圖片
         updatedData.url = downloadURLValue || props.selectDayItem.url; // 抓預設獲選取的圖片
         updatedData.timestamp = new Date().getTime(); // 設置為當前時間
@@ -222,9 +259,8 @@ watch(() => props.selectDayItem, (newVal) => {
 onMounted(() => {
     emit('loaded', 'noteContent')
     defaulthandleFileSelect();
-
-    // 在組件加載時執行的初始化操作
 });
+
 </script>
 <style>
 .content {

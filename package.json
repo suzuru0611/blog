@@ -12,6 +12,7 @@
     "@fawmi/vue-google-maps": "^0.9.79",
     "@googlemaps/js-api-loader": "^1.16.6",
     "firebase": "^10.12.2",
+    "pinia": "^2.1.7",
     "uuid": "^10.0.0",
     "vue": "^3.4.21",
     "vue-router": "^4.3.2",

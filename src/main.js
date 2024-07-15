@@ -3,5 +3,14 @@ import "./style.css";
 import App from "./App.vue";
 import router from "./router/rourter";
 import { setupFirebase } from "./services/firebase";
+import { createPinia } from "pinia";
+
 setupFirebase;
-createApp(App).use(router).mount("#app");
+
+const app = createApp(App);
+const pinia = createPinia();
+
+app.use(router);
+app.use(pinia);
+
+app.mount("#app");
