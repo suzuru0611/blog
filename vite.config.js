@@ -9,8 +9,8 @@ export default defineConfig({
     vue(),
     VitePWA({
       manifest: {
-        name: "My PWA App",
-        short_name: "PWA",
+        name: "靈感日記",
+        short_name: "靈感日記",
         start_url: "/",
         display: "standalone",
         background_color: "#ffffff",
@@ -22,7 +22,7 @@ export default defineConfig({
             type: "image/png",
           },
           {
-            src: "/icon.png",
+            src: "/icon-512.png",
             sizes: "512x512",
             type: "image/png",
           },
